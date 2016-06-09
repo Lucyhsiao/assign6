@@ -1,0 +1,1 @@
+http://MyFirstApp.firebaseapp.com/auth/handler
