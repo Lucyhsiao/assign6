@@ -39,16 +39,18 @@ firebase.database().ref("items/firstItems").remove();
 
     登入/當初狀態顯示可使用下方 logginOption function
 */
+$("#upload").css("display","block");
+$("#signin").css("display","block");
+$("#signout").css("display","block");
 
-
-
+/*
 var fbProvider = new firebase.auth.FacebookAuthProvider();
 
 
 $("#signin").click(function () {
- var div = document.getElementById("textDiv");
- div.textContent = "my text";
- var text = div.textContent;
+
+
+
 var fbProvider = new firebase.auth.FacebookAuthProvider();
 firebase.auth().signInWithPopup(fbProvider).then(function
 (result) {
@@ -63,7 +65,7 @@ var errorCode = error.code;
 var errorMessa = error.message;
 console.log(errorCode,errorMessa);
 })
-
+*/
 $("#signout").click(function () {
     // 登出後的頁面行為
     firbase.auth().signOut().then(function() {
@@ -215,3 +217,70 @@ var uploadModal = new UploadModal($(“#upload-modal”));
 var messages = new MessageBox(firebase.auth().currentUser, itemKey);
 messages.addDialog({message:”留言”, time: 1487529, name: “Radia”, picURL:”http:”});
 */
+/*
+var ref = new Firebase("https://easyauction-a8064.firebaseio.com");
+ref.authWithOAuthPopup("facebook", function(error, authData) {
+  if (error) {
+    console.log("Login Failed!", error);
+  } else {
+    console.log("Authenticated successfully with payload:", authData);
+  }
+});
+
+var ref = new Firebase("https://easyauction-a8064.firebaseio.com");
+ref.authWithOAuthRedirect("facebook", function(error) {
+  if (error) {
+    console.log("Login Failed!", error);
+  } else {
+    // We'll never get here, as the page will redirect on success.
+  }
+});
+*/
+/*
+var provider = new firebase.auth.FacebookAuthProvider();
+
+provider.addScope('user_photo');
+
+$("#signin").click(function () {
+
+firebase.auth().signInWithPopup(provider).then(function(result) {
+  // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+  var token = result.credential.accessToken;
+  // The signed-in user info.
+  var user = result.user;
+  // ...
+}).catch(function(error) {
+  // Handle Errors here.
+  var errorCode = error.code;
+  var errorMessage = error.message;
+  // The email of the user's account used.
+  var email = error.email;
+  // The firebase.auth.AuthCredential type that was used.
+  var credential = error.credential;
+  // ...
+});
+})
+*/
+
+var ref = new Firebase("https://easyauction-a8064.firebaseio.com");
+ 
+var auth =new FirebaseSimpleLogin(ref,function(error,user){
+  if (error) {
+    console.log(error);
+  } else if(user) {
+    console.log("User ID" + user.uid + ",Provider" + user.provider);
+  }else{
+    //user is logged out
+    console.log("not logged in");
+  }
+});
+
+
+$(function(){
+  $("#signin").click(function () {
+      auth.login"facebook",{
+        rememberMe:true,
+        scope: "email,user_likes"
+      }
+  });
+});
