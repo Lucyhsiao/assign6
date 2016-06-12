@@ -43,7 +43,7 @@ $("#upload").css("display","block");
 $("#signin").css("display","block");
 $("#signout").css("display","block");
 
-/*
+
 var fbProvider = new firebase.auth.FacebookAuthProvider();
 
 
@@ -61,11 +61,11 @@ result.user.photoURL(fbProvider);
 //登入後的頁面行為
 });
 }).catch(function(error) {
-var errorCode = error.code;
+various errorCode = error.code;
 var errorMessa = error.message;
 console.log(errorCode,errorMessa);
 })
-*/
+
 $("#signout").click(function () {
     // 登出後的頁面行為
     firbase.auth().signOut().then(function() {
@@ -217,7 +217,7 @@ var uploadModal = new UploadModal($(“#upload-modal”));
 var messages = new MessageBox(firebase.auth().currentUser, itemKey);
 messages.addDialog({message:”留言”, time: 1487529, name: “Radia”, picURL:”http:”});
 */
-/*
+
 var ref = new Firebase("https://easyauction-a8064.firebaseio.com");
 ref.authWithOAuthPopup("facebook", function(error, authData) {
   if (error) {
@@ -235,8 +235,8 @@ ref.authWithOAuthRedirect("facebook", function(error) {
     // We'll never get here, as the page will redirect on success.
   }
 });
-*/
-/*
+
+
 var provider = new firebase.auth.FacebookAuthProvider();
 
 provider.addScope('user_photo');
@@ -260,10 +260,10 @@ firebase.auth().signInWithPopup(provider).then(function(result) {
   // ...
 });
 })
-*/
+
 
 var ref = new Firebase("https://easyauction-a8064.firebaseio.com");
- 
+
 var auth =new FirebaseSimpleLogin(ref,function(error,user){
   if (error) {
     console.log(error);
@@ -278,7 +278,7 @@ var auth =new FirebaseSimpleLogin(ref,function(error,user){
 
 $(function(){
   $("#signin").click(function () {
-      auth.login"facebook",{
+      auth.login("facebook",{
         rememberMe:true,
         scope: "email,user_likes"
       }
