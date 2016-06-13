@@ -1,5 +1,5 @@
 
-src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"
+//src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"
 
   var config = {
     apiKey: "AIzaSyA_IYAzECEPFdq7VoS_6ywD8_9BSdQAg4Y",
@@ -10,26 +10,18 @@ src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"
   firebase.initializeApp(config);
   ImageDealer.REF = firebase;
   var currentUser;
-
+  var viewModal = new ViewModal($("#view-modal"));
+  var uploadModal = new UploadModal($("#upload-modal"));
 /*選取資料位置*/
-firebase.database().ref("items")
+// firebase.database().ref("items")
 
 /*創造資料*/
-firebase.database().ref("items/firstItems").set(data);
-firebase.database().ref("items/firstItems").push(data);
+// firebase.database().ref("items/firstItems").set(data);
+// firebase.database().ref("items/firstItems").push(data);
 
 /*存取資料*/
-firebase.database().ref("items").orderByChild("price").sta
-rtAt(10000).once("value",reProduceAll);
-
-/*更新資料*/
-var data ={};
-data["/messages/"+ uid+"/message"]= word;
-data["/users/"+"/"+uid+"/record"]= word;
-firebase.database().ref().update(messa);
-
-/*刪除資料*/
-firebase.database().ref("items/firstItems").remove();
+// firebase.database().ref("items").orderByChild("price").sta
+// rtAt(10000).once("value",reProduceAll);
 
 /*
     分為三種使用情形：
@@ -39,60 +31,85 @@ firebase.database().ref("items/firstItems").remove();
 
     登入/當初狀態顯示可使用下方 logginOption function
 */
-$("#upload").css("display","block");
-$("#signin").css("display","block");
-$("#signout").css("display","block");
+ 
+ logginOption(false);
+ firebase.auth().onAuthStateChanged(function (user) {
+    if(user){
+        logginOption(true);
+        firebase.database().ref("Items").once("value",reProduceAll);
+    }else{
+        logginOption(false);
+        firebase.database().ref("Items").once("value",reProduceAll);
+    }
+  });
 
 
 var fbProvider = new firebase.auth.FacebookAuthProvider();
 
 
-$("#signin").click(function () {
+  $("#signin").click(function () {
+    firebase.auth().signInWithPopup(fbProvider).then(function
+    (result) {
+      var data ={};
+      data["/users/"+ result.user.uid +"/name"]= result.user.displayName;
+      data["/users/"+ result.user.uid +"/picURL"]= result.user.photoURL;
+      firebase.database().ref().update(data);
+  //登入後的頁面行為
+    }).catch(function(error) {
+      var errorCode = error.code;
+      var errorMessa = error.message;
+      console.log(errorCode,errorMessa);
+  });
+  });
 
-
-
-var fbProvider = new firebase.auth.FacebookAuthProvider();
-firebase.auth().signInWithPopup(fbProvider).then(function
-(result) {
-
-result.user.displayName(fbProvider);
-result.user.uid(fbProvider);
-result.user.photoURL(fbProvider); 
-//登入後的頁面行為
-});
-}).catch(function(error) {
-various errorCode = error.code;
-var errorMessa = error.message;
-console.log(errorCode,errorMessa);
-})
-
-$("#signout").click(function () {
+  $("#signout").click(function () {
     // 登出後的頁面行為
-    firbase.auth().signOut().then(function() {
+    firebase.auth().signOut().then(function() {
       //登出後所執行之行為
     },function(error) {
       console.log(error.code);
       });   
-});
+  });
 
-$("#submitData").click(function () {
+  $("#submitData").click(function () {
+    if($("#itemName").val()!=null&& $("#price").val() !=null && $("#descrip").val() !=null &&  $("#picData")[0].files[0]){
+    var itemKey = firebase.database().ref("Items").push({"title":$("#itemName").val(),"price":parseInt($("#price").val()),"descrip":$("#descrip").val(),"seller":firebase.auth().currentUser.uid}).key;
+
+    var data ={};
+    data["/users/"+ firebase.auth().currentUser.uid +"/sellItems/"+ itemKey]= true;
+    firebase.database().ref().update(data);
+
+    uploadModal.itemKey = itemKey;
+    uploadModal.submitPic(firebase.auth().currentUser.uid);
+    
     // 上傳新商品
 
+    }
+   // uploadModal.submitPic(firebase.auth().currentUser.uid);
+   // var currentUser = firebase.auth().currentUser;
+  });
+
+
+  $("#editData").click(function () {
+    /*更新資料*/
+    if($("#itemName").val()!=null&& $("#price").val() !=null && $("#descrip").val() !=null){
+    var data ={};
+    data["/Items/"+ uploadModal.itemKey+"/title"]= $("#itemName").val();
+    data["/Items/"+ uploadModal.itemKey+"/descrip"]= $("#descrip").val();
+    data["/Items/"+ uploadModal.itemKey+"/price"]= parseInt($("#price").val());
+    firebase.database().ref().update(data);
+  }
+  if ($("#picData")[0].files[0]) {
     uploadModal.submitPic(firebase.auth().currentUser.uid);
-    var currentUser = firebase.auth().currentUser;
-    var product = new item({title:"cake",price:120,itemKey:"aaa",seller:"bbb",
-    sellerName:"Lucy"},currentUser);
-    $("<target-dom>").append(product.dom);
-});
-
-
-$("#editData").click(function () {
-    // 編輯商品資訊
-})
-
-$("#removeData").click(function () {
-    //刪除商品
-})
+  }else{
+    $("#upload-modal").modal("hide");
+  }
+  });
+  $("#removeData").click(function () {
+      //刪除商品
+      /*刪除資料*/
+  // firebase.database().ref("items/firstItems").remove();
+  });
 
 
 /*
@@ -103,14 +120,6 @@ $("#removeData").click(function () {
     3. 顯示價格低於 NT$9999 的商品
 
 */
-function selectExpItems() {
-  items.orderByChild("price").startAt(10000).on("value",readItems);
-}
-
-function selectCheapItems() {
-  items.orderByChild("price").endAt(9999).on("value",readItems);
-}
-
 
 
 function logginOption(isLoggin) {
@@ -124,28 +133,23 @@ function logginOption(isLoggin) {
     $("#signout").css("display","none");
   }
 }
+//function updateItem(title, price, descrip, pic) {
+//items.push({"title":title, "price":parseInt(price), "descrip":descrip, "imgD":pic, "userTime": new Date($.now()).toLocaleString()});
+//}
 
-function updateItem(title, price, descrip, pic) {
-items.push({"title":title, "price":parseInt(price), "descrip":descrip, "imgD":pic, "userTime": new Date($.now()).toLocaleString()});
-
-}
 
 function reProduceAll(allItems) {
-
-
-
     /*
     清空頁面上 (#item)內容上的東西。
     讀取爬回來的每一個商品
     */
-
-  /*
-    利用for in存取
-  */
-  /*for (var  in ) {
-
-    produceSingleItem();
-  }*/
+    $("#items").empty();
+    var allData= allItems.val();
+  for (var itemKey in allData ) {
+    var sinData=allData[itemKey];
+    sinData.itemKey =itemKey;
+    produceSingleItem(sinData);
+  }
 }
 // 每點開一次就註冊一次
 function produceSingleItem(sinItemData){
@@ -155,8 +159,16 @@ function produceSingleItem(sinItemData){
     資料齊全後塞進item中，創建 Item 物件，並顯示到頁面上。
   */
 
-  firebase.database().ref().once("",function () {
-    $("#items").append();
+  firebase.database().ref("users/" + sinItemData.seller + "/name" ).once("value",function (nameD) {
+    var name = nameD.val();
+    sinItemData.sellerName= name;
+    var tpItem =new Item(sinItemData, firebase.auth().currentUser);
+    $("#items").append(tpItem.dom);
+    tpItem.viewBtn.click(function() {
+      // body...
+      viewModal.writeData(sinItemData);
+      viewModal.callImage(sinItemData.itemKey,sinItemData.seller);
+    })
 
       /*
         用 ViewModal 填入這筆 item 的資料
@@ -197,90 +209,22 @@ function produceSingleItem(sinItemData){
     /*
     如果使用者有登入，替 editBtn 監聽事件，當使用者點選編輯按鈕時，將資料顯示上 uploadModal。
     */
-
+    if (tpItem.editBtn) {
+      tpItem.editBtn.click(function () {
+        // body...
+        uploadModal.editData(sinItemData);
+        uploadModal.callImage(sinItemData.itemKey, sinItemData.seller);
+      });
+    }
   })
 }
 
-function generateDialog(diaData, messageBox) {
-
-
-}
-
-
+// function generateDialog(diaData, messageBox) {}
 
 /*新增留言
 var viewModal = new ViewModal($(“#view-modal”));
 var uploadModal = new UploadModal($(“#upload-modal”));
 
-
-
 var messages = new MessageBox(firebase.auth().currentUser, itemKey);
 messages.addDialog({message:”留言”, time: 1487529, name: “Radia”, picURL:”http:”});
 */
-
-var ref = new Firebase("https://easyauction-a8064.firebaseio.com");
-ref.authWithOAuthPopup("facebook", function(error, authData) {
-  if (error) {
-    console.log("Login Failed!", error);
-  } else {
-    console.log("Authenticated successfully with payload:", authData);
-  }
-});
-
-var ref = new Firebase("https://easyauction-a8064.firebaseio.com");
-ref.authWithOAuthRedirect("facebook", function(error) {
-  if (error) {
-    console.log("Login Failed!", error);
-  } else {
-    // We'll never get here, as the page will redirect on success.
-  }
-});
-
-
-var provider = new firebase.auth.FacebookAuthProvider();
-
-provider.addScope('user_photo');
-
-$("#signin").click(function () {
-
-firebase.auth().signInWithPopup(provider).then(function(result) {
-  // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-  var token = result.credential.accessToken;
-  // The signed-in user info.
-  var user = result.user;
-  // ...
-}).catch(function(error) {
-  // Handle Errors here.
-  var errorCode = error.code;
-  var errorMessage = error.message;
-  // The email of the user's account used.
-  var email = error.email;
-  // The firebase.auth.AuthCredential type that was used.
-  var credential = error.credential;
-  // ...
-});
-})
-
-
-var ref = new Firebase("https://easyauction-a8064.firebaseio.com");
-
-var auth =new FirebaseSimpleLogin(ref,function(error,user){
-  if (error) {
-    console.log(error);
-  } else if(user) {
-    console.log("User ID" + user.uid + ",Provider" + user.provider);
-  }else{
-    //user is logged out
-    console.log("not logged in");
-  }
-});
-
-
-$(function(){
-  $("#signin").click(function () {
-      auth.login("facebook",{
-        rememberMe:true,
-        scope: "email,user_likes"
-      }
-  });
-});
