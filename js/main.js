@@ -105,10 +105,13 @@ var fbProvider = new firebase.auth.FacebookAuthProvider();
     $("#upload-modal").modal("hide");
   }
   });
+
+
   $("#removeData").click(function () {
       //刪除商品
       /*刪除資料*/
-  // firebase.database().ref("items/firstItems").remove();
+   firebase.database().ref( "Items/" + uploadModal.itemKey).remove();
+   $("#upload-modal").modal("hide");
   });
 
 
